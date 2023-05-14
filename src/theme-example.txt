@@ -1,0 +1,26 @@
+declare module '@mui/material/styles' {
+  interface Theme {
+    background: {
+      secondary: string;
+    };
+  }
+  // allow configuration using `createTheme`
+  interface ThemeOptions {
+    background?: {
+      secondary?: string;
+    };
+  }
+}
+
+const theme = createTheme({
+  background: {
+    secondary: '#E0E0E0',
+  },
+});
+
+
+import CheckIcon from '@mui/icons-material/Check';
+
+  <Avatar sx={{bgcolor: theme.palette.success.main}}>
+          <CheckIcon />
+        </Avatar>
