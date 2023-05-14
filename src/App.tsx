@@ -11,7 +11,9 @@ import Score from './components/Score';
 import DisplayBox from './components/DisplayBox';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import { useState } from 'react';
+import { Voc, Language } from './types/state';
 
 const vocs = [
   { id: 0, english: 'hello', german: 'hallo', count: 0 },
@@ -23,34 +25,64 @@ const vocs = [
 
 const theme = createTheme();
 
-interface Voc { 
-  id: number;
-  english: string;
-  german: string;
-  count: number;
-}
-
 export default function App() {
   const [voc, setVoc] = useState<Voc[]>(vocs);
+  const [currentVoc, setCurrentVoc] = useState<Voc>(voc[0]);
+  const [answer, setAnswer] = useState<string>('');
+  const [language, setLanguage] = useState<Language>('english');
+  const [solution, setSolution] = useState<boolean>(false);
+
+  function handleSolutionClick() {
+    console.log('blahh')
+  }
+
+  function checkResult() {
+    const result = currentVoc[language].toLowerCase() === answer.toLowerCase();
+    return result;
+  }
+
+  function handleClick() {
+    const result = checkResult();
+      const newVocs = [...voc].map((el) => (
+        el.id !== currentVoc.id ? el :
+          // if correct answer add one to count, else
+          result === true ? { ...el, count: el.count + 1 } : {...el, count: 0}
+      ));
+    setVoc(newVocs);
+    setSolution(!solution);
+  }
+
+  function handleNextClick() {
+    console.log('next')
+  }
+
   return (
     <>
       <Container component='main' maxWidth='sm' sx={{ mt: 5 }}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Header />
-          <Score />
+          <Score voc={voc} />
           <Box>
             <DisplayBox>
               <Grid
-                item xs={1}
+                item
+                xs={1}
                 sx={{display: 'flex', justifyContent: 'center'}}
               >
               <Avatar
-                src={deFlag}
-                alt='German Flag'
-              />
+                src={language === 'english' ? deFlag : gbFlag}
+                alt='Flag'
+                />
               </Grid>
-              <Grid item xs={11}></Grid>   
+              <Grid item xs={11}>
+                <Typography
+                  align='center'
+                  variant='body1'
+                >
+                  {language === 'english' ? currentVoc.german : currentVoc.english}
+                </Typography> 
+              </Grid>   
             </DisplayBox>
             <DisplayBox>
               <Grid
@@ -59,11 +91,20 @@ export default function App() {
                 sx={{display: 'flex', justifyContent: 'center'}}
               >
               <Avatar
-                src={gbFlag}
-                alt='British Flag'
+                src={language === 'english' ? gbFlag : deFlag}
+                alt='Flag'
               />
               </Grid>
-              <Grid item xs={11}></Grid>
+              <Grid item xs={11}>
+                <Typography
+                  align='center'
+                  variant='subtitle1'
+                  onClick={handleSolutionClick}
+                >
+                  {solution === false ? 'Für die Lösung hier klicken' :
+                  currentVoc[language] }
+                </Typography> 
+              </Grid>
             </DisplayBox>
             <Grid
               container
@@ -80,7 +121,8 @@ export default function App() {
                   label="Your answer"
                   variant="outlined"
                   fullWidth
-   
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
                 />
               </Grid>
               <Grid
@@ -89,13 +131,22 @@ export default function App() {
                 alignSelf='stretch'
                 sx={{mt: 2,}}
               >
-                <Button
+                {!solution && <Button
                   variant='contained'
                   sx={{ height: '100%' }}
                   fullWidth
+                  onClick={handleClick}
                 >
                   OK
-                </Button>
+                </Button>}
+                {solution && <Button
+                  variant='contained'
+                  sx={{ height: '100%' }}
+                  fullWidth
+                  onClick={handleNextClick}
+                >
+                  NEXT
+                </Button>}
               </Grid>
             </Grid>
           </Box>
