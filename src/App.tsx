@@ -12,6 +12,8 @@ import DisplayBox from './components/DisplayBox';
 import TextField from '@mui/material/TextField';
 import MyButton from './components/Button';
 import Typography from '@mui/material/Typography';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
 import { Voc, Language } from './types/state';
 
@@ -32,14 +34,16 @@ export default function App() {
   const [language, setLanguage] = useState<Language>('english');
   const [solution, setSolution] = useState<boolean>(false);
   const [started, setStarted] = useState<boolean>(false);
+  const [result, setResult] = useState<boolean | null>(null);
 
   function calcNewVocs(): Voc[] {
-    const result = currentVoc[language].toLowerCase() === answer.toLowerCase();
+    const newResult = currentVoc[language].toLowerCase() === answer.toLowerCase();
     const newVocs = [...voc].map((el) => (
       el.id !== currentVoc.id ? el :
         // if correct answer add one to count, else reset count to 0
-        result === true ? { ...el, count: el.count + 1 } : {...el, count: 0}
+        newResult === true ? { ...el, count: el.count + 1 } : {...el, count: 0}
     ));
+    setResult(newResult);
     return newVocs;
   }
 
@@ -83,9 +87,9 @@ export default function App() {
           <Header />
           <Score voc={voc} />
           <Box>
-          <DisplayBox>
-          {
-            started && 
+            <DisplayBox>
+            {
+              started && 
               <>
                 <Grid
                   item
@@ -172,6 +176,33 @@ export default function App() {
                 }
               </Grid>
             </Grid>
+            <Box sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              mt: '1em'
+            }}>
+              {
+                solution && result &&
+                <Avatar sx={
+                  {
+                    bgcolor: theme.palette.success.main,
+                  }}
+                >
+                  <CheckIcon />
+                </Avatar>
+              }
+              {
+                solution && !result &&
+                <Avatar sx={
+                  {
+                    bgcolor: theme.palette.error.main,
+                  }}
+                >
+                  <CloseIcon />
+                </Avatar>
+              }
+              
+            </Box>
           </Box>
         </ThemeProvider>
       </Container>

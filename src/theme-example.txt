@@ -22,5 +22,5 @@ const theme = createTheme({
 import CheckIcon from '@mui/icons-material/Check';
 
   <Avatar sx={{bgcolor: theme.palette.success.main}}>
-          <CheckIcon />
-        </Avatar>
+    <CheckIcon />
+  </Avatar>
