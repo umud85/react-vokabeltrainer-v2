@@ -31,11 +31,13 @@ export default function App() {
   const [voc, setVoc] = useState<Voc[]>(vocs);
   const [currentVoc, setCurrentVoc] = useState<Voc>(voc[0]);
   const [answer, setAnswer] = useState<string>('');
-  const [language, setLanguage] = useState<Language>('english');
+  const [isEnglish, setIsEnglish] = useState<boolean>(true);
   const [solution, setSolution] = useState<boolean>(false);
   const [started, setStarted] = useState<boolean>(false);
   const [result, setResult] = useState<boolean | null>(null);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+
+  const language: Language = isEnglish ? 'english' : 'german';
 
   function calcNewVocs(): Voc[] {
     const newResult = currentVoc[language].toLowerCase() === answer.toLowerCase();
@@ -87,11 +89,11 @@ export default function App() {
     setCurrentVoc(voc[0]);
     setSolution(false);
     setResult(null);
-    setLanguage('english');
   }
 
   function handleNextClick() {
     setSolution(false);
+    setIsEnglish(!isEnglish);
   }
 
     function handleSolutionClick() {
