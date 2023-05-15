@@ -19,10 +19,10 @@ import { Voc, Language } from './types/state';
 
 const vocs = [
   { id: 0, english: 'hello', german: 'hallo', count: 0 },
-  { id: 1, english: 'car', german: 'Auto', count: 0 },
-  { id: 2, english: 'dog', german: 'Hund', count: 0 },
-  { id: 3, english: 'water', german: 'Wasser', count: 0 },
-  { id: 4, english: 'coffee', german: 'Kaffee', count: 0 },
+  // { id: 1, english: 'car', german: 'Auto', count: 0 },
+  // { id: 2, english: 'dog', german: 'Hund', count: 0 },
+  // { id: 3, english: 'water', german: 'Wasser', count: 0 },
+  // { id: 4, english: 'coffee', german: 'Kaffee', count: 0 },
 ];
 
 const theme = createTheme();
@@ -35,6 +35,7 @@ export default function App() {
   const [solution, setSolution] = useState<boolean>(false);
   const [started, setStarted] = useState<boolean>(false);
   const [result, setResult] = useState<boolean | null>(null);
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
   function calcNewVocs(): Voc[] {
     const newResult = currentVoc[language].toLowerCase() === answer.toLowerCase();
@@ -57,21 +58,39 @@ export default function App() {
     return chosenVocIndex;
   }
 
+  function checkGameOver(newVocs: Voc[]): boolean {
+    const length = newVocs.filter((el) => el.count === 3).length;
+    return vocs.length === length;
+  }
+
   function handleClick() {
-    const newVocs = calcNewVocs();
-    setVoc(newVocs);
-    setSolution(true);
-  }
-
-  function handleStartClick() {
-    
-    setStarted(true);
-  }
-
-  function handleNextClick() {
     const newVocs = calcNewVocs();
     const nextVoc = newVocs[getRandVoc(newVocs)];
     setCurrentVoc(nextVoc);
+    setVoc(newVocs);
+    setSolution(true);
+    if (checkGameOver(newVocs)) {
+      setCurrentVoc(currentVoc);
+      console.log(currentVoc);
+      setIsGameOver(true);
+    }
+  }
+
+  function handleStartClick() {
+    setStarted(true);
+  }
+
+  function handlePlayAgain() {
+    setIsGameOver(false);
+    setStarted(true);
+    setVoc(vocs);
+    setCurrentVoc(voc[0]);
+    setSolution(false);
+    setResult(null);
+    setLanguage('english');
+  }
+
+  function handleNextClick() {
     setSolution(false);
   }
 
@@ -106,7 +125,7 @@ export default function App() {
                     align='center'
                     variant='body1'
                   >
-                    {language === 'english' ? currentVoc.german : currentVoc.english}
+                    {language === 'english' ? currentVoc?.german : currentVoc?.english}
                 </Typography> 
                 </Grid>   
               </>
@@ -133,7 +152,7 @@ export default function App() {
                       onClick={handleSolutionClick}
                     >
                       {solution === false ? 'Für die Lösung hier klicken' :
-                      currentVoc[language] }
+                      currentVoc[language]}
                     </Typography> 
                   </Grid>
                 </>
@@ -165,15 +184,17 @@ export default function App() {
                 alignSelf='stretch'
                 sx={{mt: 2,}}
               >
-                {!started &&
+                {!started && !isGameOver &&
                   <MyButton label='start' handler={handleStartClick} />    
                 }
-                {started && solution &&
+                {started && solution && !isGameOver &&
                   <MyButton label='next' handler={handleNextClick} />
                 }  
-                {started && !solution && 
+                {started && !solution && !isGameOver &&
                   <MyButton label='ok' handler={handleClick} />
                 }
+                {isGameOver && <MyButton
+                  label='play again' handler={handlePlayAgain} />}
               </Grid>
             </Grid>
             <Box sx={{
@@ -201,7 +222,6 @@ export default function App() {
                   <CloseIcon />
                 </Avatar>
               }
-              
             </Box>
           </Box>
         </ThemeProvider>
