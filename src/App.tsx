@@ -10,7 +10,7 @@ import Header from './components/Header';
 import Score from './components/Score';
 import DisplayBox from './components/DisplayBox';
 import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
+import MyButton from './components/Button';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { Voc, Language } from './types/state';
@@ -31,29 +31,48 @@ export default function App() {
   const [answer, setAnswer] = useState<string>('');
   const [language, setLanguage] = useState<Language>('english');
   const [solution, setSolution] = useState<boolean>(false);
+  const [started, setStarted] = useState<boolean>(false);
 
-  function handleSolutionClick() {
-    console.log('blahh')
+  function calcNewVocs(): Voc[] {
+    const result = currentVoc[language].toLowerCase() === answer.toLowerCase();
+    const newVocs = [...voc].map((el) => (
+      el.id !== currentVoc.id ? el :
+        // if correct answer add one to count, else reset count to 0
+        result === true ? { ...el, count: el.count + 1 } : {...el, count: 0}
+    ));
+    return newVocs;
   }
 
-  function checkResult() {
-    const result = currentVoc[language].toLowerCase() === answer.toLowerCase();
-    return result;
+  function getRandVoc(vocs: Voc[]): number {
+    // filter out vocs with count 3
+    const nextVocs = vocs.filter((el) => el.count < 3);
+    // get random voc from filterd array
+    const randomVoc = nextVocs[Math.trunc(Math.random() * nextVocs.length)];
+    // search index in original vocs
+    const chosenVocIndex = vocs.indexOf(randomVoc);
+    return chosenVocIndex;
   }
 
   function handleClick() {
-    const result = checkResult();
-      const newVocs = [...voc].map((el) => (
-        el.id !== currentVoc.id ? el :
-          // if correct answer add one to count, else
-          result === true ? { ...el, count: el.count + 1 } : {...el, count: 0}
-      ));
+    const newVocs = calcNewVocs();
     setVoc(newVocs);
-    setSolution(!solution);
+    setSolution(true);
+  }
+
+  function handleStartClick() {
+    
+    setStarted(true);
   }
 
   function handleNextClick() {
-    console.log('next')
+    const newVocs = calcNewVocs();
+    const nextVoc = newVocs[getRandVoc(newVocs)];
+    setCurrentVoc(nextVoc);
+    setSolution(false);
+  }
+
+    function handleSolutionClick() {
+    console.log('solution')
   }
 
   return (
@@ -64,47 +83,58 @@ export default function App() {
           <Header />
           <Score voc={voc} />
           <Box>
-            <DisplayBox>
-              <Grid
-                item
-                xs={1}
-                sx={{display: 'flex', justifyContent: 'center'}}
-              >
-              <Avatar
-                src={language === 'english' ? deFlag : gbFlag}
-                alt='Flag'
-                />
-              </Grid>
-              <Grid item xs={11}>
-                <Typography
-                  align='center'
-                  variant='body1'
+          <DisplayBox>
+          {
+            started && 
+              <>
+                <Grid
+                  item
+                  xs={1}
+                  sx={{display: 'flex', justifyContent: 'center'}}
                 >
-                  {language === 'english' ? currentVoc.german : currentVoc.english}
+                  <Avatar
+                    src={language === 'english' ? deFlag : gbFlag}
+                    alt='Flag'
+                  />
+                </Grid>
+                <Grid item xs={11}>
+                  <Typography
+                    align='center'
+                    variant='body1'
+                  >
+                    {language === 'english' ? currentVoc.german : currentVoc.english}
                 </Typography> 
-              </Grid>   
+                </Grid>   
+              </>
+            }
+            {!started && <Typography></Typography>}  
             </DisplayBox>
             <DisplayBox>
-              <Grid
-                item
-                xs={1}
-                sx={{display: 'flex', justifyContent: 'center'}}
-              >
-              <Avatar
-                src={language === 'english' ? gbFlag : deFlag}
-                alt='Flag'
-              />
-              </Grid>
-              <Grid item xs={11}>
-                <Typography
-                  align='center'
-                  variant='subtitle1'
-                  onClick={handleSolutionClick}
-                >
-                  {solution === false ? 'Für die Lösung hier klicken' :
-                  currentVoc[language] }
-                </Typography> 
-              </Grid>
+              {started && 
+                <>
+                  <Grid
+                    item
+                    xs={1}
+                    sx={{display: 'flex', justifyContent: 'center'}}
+                  >
+                    <Avatar
+                      src={language === 'english' ? gbFlag : deFlag}
+                      alt='Flag'
+                    />
+                  </Grid>
+                  <Grid item xs={11}>
+                    <Typography
+                      align='center'
+                      variant='subtitle1'
+                      onClick={handleSolutionClick}
+                    >
+                      {solution === false ? 'Für die Lösung hier klicken' :
+                      currentVoc[language] }
+                    </Typography> 
+                  </Grid>
+                </>
+              }
+              {!started && null}
             </DisplayBox>
             <Grid
               container
@@ -131,22 +161,15 @@ export default function App() {
                 alignSelf='stretch'
                 sx={{mt: 2,}}
               >
-                {!solution && <Button
-                  variant='contained'
-                  sx={{ height: '100%' }}
-                  fullWidth
-                  onClick={handleClick}
-                >
-                  OK
-                </Button>}
-                {solution && <Button
-                  variant='contained'
-                  sx={{ height: '100%' }}
-                  fullWidth
-                  onClick={handleNextClick}
-                >
-                  NEXT
-                </Button>}
+                {!started &&
+                  <MyButton label='start' handler={handleStartClick} />    
+                }
+                {started && solution &&
+                  <MyButton label='next' handler={handleNextClick} />
+                }  
+                {started && !solution && 
+                  <MyButton label='ok' handler={handleClick} />
+                }
               </Grid>
             </Grid>
           </Box>
