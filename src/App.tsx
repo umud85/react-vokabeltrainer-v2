@@ -14,7 +14,7 @@ import MyButton from './components/Button';
 import Typography from '@mui/material/Typography';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Voc, Language } from './types/state';
 
 const vocs = [
@@ -36,6 +36,8 @@ export default function App() {
   const [started, setStarted] = useState<boolean>(false);
   const [result, setResult] = useState<boolean | null>(null);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const language: Language = isEnglish ? 'english' : 'german';
 
@@ -80,6 +82,7 @@ export default function App() {
 
   function handleStartClick() {
     setStarted(true);
+    inputRef.current?.focus();
   }
 
   function handlePlayAgain() {
@@ -89,11 +92,14 @@ export default function App() {
     setCurrentVoc(voc[0]);
     setSolution(false);
     setResult(null);
+    inputRef.current?.focus();
   }
 
   function handleNextClick() {
     setSolution(false);
     setIsEnglish(!isEnglish);
+    setAnswer('');
+    inputRef.current?.focus();
   }
 
     function handleSolutionClick() {
@@ -178,6 +184,7 @@ export default function App() {
                   fullWidth
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
+                  inputRef={inputRef}
                 />
               </Grid>
               <Grid
