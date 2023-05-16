@@ -19,10 +19,10 @@ import { Voc, Language } from './types/state';
 
 const vocs = [
   { id: 0, english: 'hello', german: 'hallo', count: 0 },
-  // { id: 1, english: 'car', german: 'Auto', count: 0 },
-  // { id: 2, english: 'dog', german: 'Hund', count: 0 },
-  // { id: 3, english: 'water', german: 'Wasser', count: 0 },
-  // { id: 4, english: 'coffee', german: 'Kaffee', count: 0 },
+  { id: 1, english: 'car', german: 'Auto', count: 0 },
+  { id: 2, english: 'dog', german: 'Hund', count: 0 },
+  { id: 3, english: 'water', german: 'Wasser', count: 0 },
+  { id: 4, english: 'coffee', german: 'Kaffee', count: 0 },
 ];
 
 const theme = createTheme();
@@ -67,6 +67,27 @@ export default function App() {
     return vocs.length === length;
   }
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) { 
+    if (e.key === 'Enter') {
+      if (!started) {
+        handleStartClick();
+        return;
+      }
+      if (isGameOver) {
+        handlePlayAgain();
+        return;
+      }
+      if (!solution) {
+        handleClick();
+        return;
+      }
+      if (solution) { 
+        handleNextClick();
+        return;
+      }
+    }
+  }
+
   function handleClick() {
     const newVocs = calcNewVocs();
     const nextVoc = newVocs[getRandVoc(newVocs)];
@@ -92,6 +113,7 @@ export default function App() {
     setCurrentVoc(voc[0]);
     setSolution(false);
     setResult(null);
+    setAnswer('');
     inputRef.current?.focus();
   }
 
@@ -185,6 +207,7 @@ export default function App() {
                   value={answer}
                   onChange={(e) => setAnswer(e.target.value)}
                   inputRef={inputRef}
+                  onKeyDown={handleKeyDown}
                 />
               </Grid>
               <Grid
